@@ -1,0 +1,299 @@
+import streamlit as st
+import pandas as pd
+import sys
+import os
+
+st.set_page_config(
+    page_title="Fleet Dashboard",
+    layout="wide"
+)
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from modules.loader import load_data
+from modules.alerts import service_alert, document_alert
+from modules.analytics import km_chart
+from modules.styling import highlight_service
+from modules.analytics import km_chart, utilization_chart, qc_chart
+from modules.fleet_status import fleet_status
+from modules.styling import highlight_status
+from modules.fleet_board import fleet_control_board
+from modules.maintenance_prediction import maintenance_prediction
+from modules.tire_monitor import tire_alert
+from modules.qc_alert import qc_alert
+from modules.qc_board import qc_control_board
+from modules.vehicle_detail import vehicle_detail
+
+master, dokumen, km, qc = load_data()
+
+# =====================
+# MERGE DATA
+# =====================
+
+status_df = master.merge(km, on="ID_UNIT", how="left")
+
+# =====================
+# FILTER UNIT
+# =====================
+
+# unit_filter = st.selectbox(
+#    "Pilih Unit",
+#    ["All"] + list(master["ID_UNIT"].unique()),
+#    key="filter_unit"
+# )
+
+# filter jika dipilih
+#if unit_filter != "All":
+
+#    master = master[master["ID_UNIT"] == unit_filter]
+#    km = km[km["ID_UNIT"] == unit_filter]
+#    qc = qc[qc["ID_UNIT"] == unit_filter]
+
+# =====================
+# STATUS ARMADA
+# =====================
+
+def get_status(row):
+
+    if row["KM_UPDATE"] > row["KM_SERVICE_NEXT"]:
+        return "Service Overdue"
+
+    elif row["KM_SERVICE_NEXT"] - row["KM_UPDATE"] <= 5000:
+        return "Service Soon"
+
+    else:
+        return "Ready"
+
+status_df["STATUS"] = status_df.apply(get_status, axis=1)
+
+# ====================
+# Menu
+# ====================    
+
+menu = st.sidebar.selectbox(
+    "Menu",
+    [
+        "Dashboard",
+        "Fleet Data",
+        "Maintenance",
+        "QC Inspection",
+        "Vehicle Detail"
+    ],
+    key="menu"
+)
+
+# =====================
+# SEARCH UNIT
+# =====================
+
+st.sidebar.header("Search")
+
+search_unit = st.sidebar.text_input(
+    "Cari ID Unit / Nopol"
+)
+
+if search_unit:
+
+    master = master[
+        master["ID_UNIT"].astype(str).str.contains(search_unit, case=False) |
+        master["NO_POLISI"].astype(str).str.contains(search_unit, case=False)
+    ]
+
+    km = km[km["ID_UNIT"].isin(master["ID_UNIT"])]
+    qc = qc[qc["ID_UNIT"].isin(master["ID_UNIT"])]
+    
+
+# ====================
+# Dashboard
+# ====================
+
+if menu == "Dashboard":
+
+    st.title("🚐 Fleet Management Dashboard")
+
+    service_due = service_alert(km)
+    doc_due = document_alert(dokumen)
+
+    # KPI
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Total Armada", len(master))
+    col2.metric("Service Due", len(service_due))
+    col3.metric("Dokumen Expired", len(doc_due))
+
+    st.divider()
+
+    # =====================
+    # FLEET STATUS SUMMARY
+    # =====================
+
+    ready = status_df[status_df["STATUS"] == "Ready"]
+    soon = status_df[status_df["STATUS"] == "Service Soon"]
+    overdue = status_df[status_df["STATUS"] == "Service Overdue"]
+
+    st.subheader("🚦 Fleet Readiness Status")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("🟢 Ready", len(ready))
+    col2.metric("🟡 Service Soon", len(soon))
+    col3.metric("🔴 Service Overdue", len(overdue))
+
+    st.divider()
+
+    fleet_control_board(status_df)
+
+    # Grafik
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig = km_chart(km)
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        fig = qc_chart(qc)
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.divider()
+
+    fig = utilization_chart(km)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.divider()
+
+    # =====================
+    # ALERT SECTION
+    # =====================
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("⚠ Service Alert")
+
+        service_due = service_alert(km)
+
+        if service_due.empty:
+            st.success("Tidak ada kendaraan yang perlu service")
+        else:
+            st.dataframe(service_due, use_container_width=True)
+
+    with col2:
+        st.subheader("📄 Dokumen Expired")
+
+        doc_due = document_alert(dokumen)
+
+        if doc_due.empty:
+            st.success("Tidak ada dokumen yang expired")
+        else:
+            st.dataframe(doc_due, use_container_width=True)
+
+    
+
+# ====================
+# Fleet Data
+# ====================
+
+if menu == "Fleet Data":
+
+    st.title("Data Kendaraan")
+
+    st.dataframe(
+        status_df,
+        use_container_width=True
+    )
+
+    st.subheader("Fleet Status Board")
+
+    st.dataframe(
+        status_df[[
+            "ID_UNIT",
+            "NO_POLISI",
+            "KM_UPDATE",
+            "KM_SERVICE_NEXT",
+            "STATUS"
+        ]].style.apply(highlight_status, axis=1),
+        use_container_width=True
+    )
+
+# ====================
+# Maintenance
+# ====================
+
+if menu == "Maintenance":
+
+    st.title("Maintenance Monitoring")
+
+    st.dataframe(
+        km.style.apply(highlight_service, axis=1),
+        use_container_width=True
+    )
+
+    prediction = maintenance_prediction(km)
+
+    st.subheader("🔧 Service Prediction (<5000 KM)")
+
+    st.dataframe(
+        prediction,
+        use_container_width=True
+    )
+
+    st.subheader("🛞 Tire Alert (TWI < 2mm)")
+
+    tire_due = tire_alert(km)
+
+    st.dataframe(
+        tire_due,
+        use_container_width=True
+    )
+
+# ====================
+# QC Inspection
+# ====================
+
+if menu == "QC Inspection":
+
+    qc_control_board(qc)
+
+    st.divider()
+
+    st.dataframe(qc, use_container_width=True)
+
+    st.subheader("QC Terakhir Kendaraan")
+
+    # pastikan kolom tanggal sudah datetime
+    qc["TGL_CEK"] = pd.to_datetime(qc["TGL_CEK"], errors="coerce")
+
+    # ambil data QC terakhir per unit
+    qc_latest = qc.sort_values("TGL_CEK").drop_duplicates("ID_UNIT", keep="last")
+
+    st.dataframe(qc_latest.astype(str), width="stretch")
+
+    today = pd.Timestamp.today()
+
+    qc_latest["DAYS"] = (today - qc_latest["TGL_CEK"]).dt.days
+
+    overdue = qc_latest[qc_latest["DAYS"] > 7]
+
+    st.subheader("⚠ QC Belum Dicek > 7 Hari")
+
+    st.dataframe(overdue.astype(str), width="stretch")
+
+
+# ====================
+# Vehicle Detail
+# ====================
+
+if menu == "Vehicle Detail":
+
+    st.title("Vehicle Detail")
+
+    unit = st.selectbox(
+        "Pilih Unit",
+        master["ID_UNIT"].unique()
+    )
+
+    vehicle_detail(master, km, dokumen, qc, unit)
+
+
+print("QC COLUMNS:", qc.columns)
+ 
