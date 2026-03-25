@@ -26,7 +26,7 @@ from modules.vehicle_detail import vehicle_detail
 from modules.crud_master import create_master, update_master, delete_master
 
 with st.spinner("Loading data..."):
-master, dokumen, km, qc = load_data()
+    master, dokumen, km, qc = load_data()
 
 # =====================
 # MERGE DATA
