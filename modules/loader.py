@@ -3,6 +3,9 @@ import gspread
 import pandas as pd
 from google.oauth2.service_account import Credentials
 
+@st.cache_data(ttl=300) # 5 menit
+def load_data():
+
 def load_data():
 
     creds_dict = st.secrets["gcp_service_account"]
