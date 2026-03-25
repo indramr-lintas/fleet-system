@@ -13,7 +13,7 @@ def load_data():
 
     client = gspread.authorize(creds)
 
-    sheet = client.open_by_url(https://docs.google.com/spreadsheets/d/1NiEwbJBUG_0vGBlCgEVNM-Q-uTzn8q0pS3q5MhB-So4/edit?pli=1&gid=1845338611#gid=1845338611)
+    sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1NiEwbJBUG_0vGBlCgEVNM-Q-uTzn8q0pS3q5MhB-So4/edit?pli=1&gid=1845338611#gid=1845338611")
 
 #def load_data():
 
