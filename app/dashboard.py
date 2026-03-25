@@ -24,6 +24,10 @@ from modules.qc_alert import qc_alert
 from modules.qc_board import qc_control_board
 from modules.vehicle_detail import vehicle_detail
 from modules.crud_master import create_master, update_master, delete_master
+from modules.crud_operational import (
+    create_qc, update_qc, delete_qc,
+    create_km, update_km, delete_km
+)
 
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
@@ -80,7 +84,9 @@ menu = st.sidebar.selectbox(
         "Maintenance",
         "QC Inspection",
         "Vehicle Detail",
-        "CRUD Master"
+        "CRUD Master",
+        "CRUD QC",
+        "CRUD KM"
     ],
     key="menu"
 )
@@ -363,6 +369,114 @@ if menu == "CRUD Master":
         if st.button("Delete"):
             delete_master(selected_index + 2)
             st.warning("Data dihapus")
+            st.cache_data.clear()
+
+# ====================
+# CURD QC
+# ====================
+
+if menu == "CRUD QC":
+
+    st.title("QC Inspection")
+
+    _, _, _, qc = load_data()
+
+    # CREATE
+    st.subheader("➕ Input QC")
+
+    with st.form("form_qc"):
+
+        id_unit = st.text_input("ID Unit")
+        tgl = st.date_input("Tanggal QC")
+        kondisi = st.text_input("Kondisi")
+
+        submit = st.form_submit_button("Simpan")
+
+        if submit:
+            create_qc([id_unit, str(tgl), kondisi])
+            st.success("QC berhasil ditambahkan")
+            st.cache_data.clear()
+
+    st.divider()
+
+    # READ
+    st.dataframe(qc, use_container_width=True)
+
+    st.divider()
+
+    # UPDATE & DELETE
+    idx = st.selectbox("Pilih Data", qc.index)
+
+    row = qc.loc[idx]
+
+    new_kondisi = st.text_input("Edit Kondisi", row.iloc[2])
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Update QC"):
+            update_qc(idx + 2, [row.iloc[0], row.iloc[1], new_kondisi])
+            st.success("Updated")
+            st.cache_data.clear()
+
+    with col2:
+        if st.button("Delete QC"):
+            delete_qc(idx + 2)
+            st.warning("Deleted")
+            st.cache_data.clear()
+
+# ====================
+# CURD KM
+# ====================
+
+if menu == "CRUD KM":
+
+    st.title("Monitoring KM")
+
+    _, _, km, _ = load_data()
+
+    # CREATE
+    st.subheader("➕ Input KM")
+
+    with st.form("form_km"):
+
+        id_unit = st.text_input("ID Unit")
+        km_update = st.number_input("KM Update")
+        km_next = st.number_input("KM Service Next")
+
+        submit = st.form_submit_button("Simpan")
+
+        if submit:
+            create_km([id_unit, km_update, km_next])
+            st.success("KM berhasil ditambahkan")
+            st.cache_data.clear()
+
+    st.divider()
+
+    # READ
+    st.dataframe(km, use_container_width=True)
+
+    st.divider()
+
+    # UPDATE & DELETE
+    idx = st.selectbox("Pilih Data KM", km.index)
+
+    row = km.loc[idx]
+
+    new_km = st.number_input("Edit KM", value=int(row.iloc[1]))
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Update KM"):
+            update_km(idx + 2, [row.iloc[0], new_km, row.iloc[2]])
+            st.success("Updated")
+            st.cache_data.clear()
+
+    with col2:
+        if st.button("Delete KM"):
+            delete_km(idx + 2)
+            st.warning("Deleted")
             st.cache_data.clear()
 
 
