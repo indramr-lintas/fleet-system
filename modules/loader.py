@@ -40,3 +40,5 @@ def load_data():
     )
 
     return master, dokumen, km, qc
+
+st.write(creds_dict["client_email"])
