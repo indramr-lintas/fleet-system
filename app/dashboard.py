@@ -23,7 +23,9 @@ from modules.tire_monitor import tire_alert
 from modules.qc_alert import qc_alert
 from modules.qc_board import qc_control_board
 from modules.vehicle_detail import vehicle_detail
+from modules.crud_master import create_master, update_master, delete_master
 
+with st.spinner("Loading data..."):
 master, dokumen, km, qc = load_data()
 
 # =====================
@@ -77,7 +79,8 @@ menu = st.sidebar.selectbox(
         "Fleet Data",
         "Maintenance",
         "QC Inspection",
-        "Vehicle Detail"
+        "Vehicle Detail",
+        "CRUD Master"
     ],
     key="menu"
 )
@@ -295,5 +298,72 @@ if menu == "Vehicle Detail":
     vehicle_detail(master, km, dokumen, qc, unit)
 
 
-print("QC COLUMNS:", qc.columns)
+# ====================
+# CURD Master
+# ====================
+
+if menu == "CRUD Master":
+
+    st.title("CRUD Master Kendaraan")
+
+    # LOAD DATA
+    master, _, _, _ = load_data()
+
+    # =====================
+    # CREATE
+    # =====================
+    st.subheader("➕ Tambah Data")
+
+    with st.form("form_create"):
+        id_unit = st.text_input("ID Unit")
+        no_polisi = st.text_input("No Polisi")
+
+        submit = st.form_submit_button("Simpan")
+
+        if submit:
+            create_master(id_unit, no_polisi)
+            st.success("Data berhasil ditambahkan")
+            st.cache_data.clear()
+
+    st.divider()
+
+    # =====================
+    # READ
+    # =====================
+    st.subheader("📋 Data Master")
+
+    st.dataframe(master, use_container_width=True)
+
+    st.divider()
+
+    # =====================
+    # UPDATE & DELETE
+    # =====================
+    st.subheader("✏️ Edit / Hapus")
+
+    selected_index = st.selectbox(
+        "Pilih Data",
+        master.index
+    )
+
+    row = master.loc[selected_index]
+
+    new_id = st.text_input("ID Unit (Edit)", row["ID_UNIT"])
+    new_nopol = st.text_input("No Polisi (Edit)", row["NO_POLISI"])
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Update"):
+            update_master(selected_index + 2, new_id, new_nopol)
+            st.success("Data berhasil diupdate")
+            st.cache_data.clear()
+
+    with col2:
+        if st.button("Delete"):
+            delete_master(selected_index + 2)
+            st.warning("Data dihapus")
+            st.cache_data.clear()
+
+
  
