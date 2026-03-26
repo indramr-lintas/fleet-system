@@ -150,8 +150,6 @@ if menu == "Dashboard":
 
     st.divider()
 
-    fleet_control_board(status_df)
-
     # Grafik
     col1, col2 = st.columns(2)
 
@@ -204,12 +202,7 @@ if menu == "Dashboard":
 
 if menu == "Fleet Data":
 
-    st.title("Data Kendaraan")
-
-    st.dataframe(
-        status_df,
-        use_container_width=True
-    )
+    fleet_control_board(status_df)
 
     st.subheader("Fleet Status Board")
 
@@ -221,6 +214,13 @@ if menu == "Fleet Data":
             "KM_SERVICE_NEXT",
             "STATUS"
         ]].style.apply(highlight_status, axis=1),
+        use_container_width=True
+    )
+    
+    st.title("Data Kendaraan")
+
+    st.dataframe(
+        status_df,
         use_container_width=True
     )
 
