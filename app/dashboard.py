@@ -327,9 +327,18 @@ if menu == "CRUD Master":
         submit = st.form_submit_button("Simpan")
 
         if submit:
-            create_master(id_unit, no_polisi)
-            st.success("Data berhasil ditambahkan")
-            st.cache_data.clear()
+
+            if not id_unit or not no_polisi:
+                st.error("Semua field wajib diisi!")
+            
+            elif id_unit in master["ID_UNIT"].values:
+                st.warning("ID Unit sudah ada!")
+            
+            else:
+                create_master(id_unit, no_polisi)
+                st.success("Data berhasil ditambahkan")
+                st.cache_data.clear()
+                st.rerun()
 
     st.divider()
 
@@ -360,16 +369,10 @@ if menu == "CRUD Master":
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Update"):
-            update_master(selected_index + 2, new_id, new_nopol)
-            st.success("Data berhasil diupdate")
-            st.cache_data.clear()
+        id_unit = st.selectbox("ID Unit", master["ID_UNIT"])
 
     with col2:
-        if st.button("Delete"):
-            delete_master(selected_index + 2)
-            st.warning("Data dihapus")
-            st.cache_data.clear()
+        no_polisi = st.text_input("No Polisi")
 
 # ====================
 # CURD QC
@@ -386,16 +389,29 @@ if menu == "CRUD QC":
 
     with st.form("form_qc"):
 
-        id_unit = st.text_input("ID Unit")
-        tgl = st.date_input("Tanggal QC")
+        master, _, _, _ = load_data()
+
+        id_unit = st.selectbox(
+            "Pilih ID Unit",
+            master["ID_UNIT"].unique()
+        )
+        from datetime import datetime
+
+        tgl = datetime.now()
         kondisi = st.text_input("Kondisi")
 
         submit = st.form_submit_button("Simpan")
 
         if submit:
-            create_qc([id_unit, str(tgl), kondisi])
-            st.success("QC berhasil ditambahkan")
-            st.cache_data.clear()
+
+            if not id_unit or not kondisi:
+                st.error("Data belum lengkap!")
+            
+            else:
+                create_qc([id_unit, str(tgl), kondisi])
+                st.success("QC berhasil ditambahkan")
+                st.cache_data.clear()
+                st.rerun()
 
     st.divider()
 
@@ -414,16 +430,10 @@ if menu == "CRUD QC":
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Update QC"):
-            update_qc(idx + 2, [row.iloc[0], row.iloc[1], new_kondisi])
-            st.success("Updated")
-            st.cache_data.clear()
+        id_unit = st.selectbox("ID Unit", master["ID_UNIT"])
 
     with col2:
-        if st.button("Delete QC"):
-            delete_qc(idx + 2)
-            st.warning("Deleted")
-            st.cache_data.clear()
+        no_polisi = st.text_input("No Polisi")
 
 # ====================
 # CURD KM
@@ -440,16 +450,28 @@ if menu == "CRUD KM":
 
     with st.form("form_km"):
 
-        id_unit = st.text_input("ID Unit")
+        id_unit = st.selectbox(
+            "Pilih ID Unit",
+            master["ID_UNIT"].unique()
+        )
         km_update = st.number_input("KM Update")
         km_next = st.number_input("KM Service Next")
 
         submit = st.form_submit_button("Simpan")
 
         if submit:
-            create_km([id_unit, km_update, km_next])
-            st.success("KM berhasil ditambahkan")
-            st.cache_data.clear()
+
+            if km_update <= 0:
+                st.error("KM tidak valid!")
+            
+            elif km_next <= km_update:
+                st.warning("KM service harus lebih besar dari KM update!")
+            
+            else:
+                create_km([id_unit, km_update, km_next])
+                st.success("Data KM berhasil ditambahkan")
+                st.cache_data.clear()
+                st.rerun()
 
     st.divider()
 
@@ -468,16 +490,10 @@ if menu == "CRUD KM":
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Update KM"):
-            update_km(idx + 2, [row.iloc[0], new_km, row.iloc[2]])
-            st.success("Updated")
-            st.cache_data.clear()
+        id_unit = st.selectbox("ID Unit", master["ID_UNIT"])
 
     with col2:
-        if st.button("Delete KM"):
-            delete_km(idx + 2)
-            st.warning("Deleted")
-            st.cache_data.clear()
+        no_polisi = st.text_input("No Polisi")
 
 
  
