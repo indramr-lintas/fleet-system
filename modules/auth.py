@@ -1,21 +1,58 @@
 import streamlit as st
 
-# USER SEMENTARA (bisa kamu ganti)
+# =====================
+# USERS
+# =====================
 USERS = {
     "admin": {
         "password": "admin123",
         "role": "admin"
     },
-    "user": {
+    "user1": {
         "password": "user123",
         "role": "user"
     }
 }
 
+# =====================
+# ROLE PERMISSIONS
+# =====================
+ROLE_PERMISSIONS = {
+    "admin": [
+        "view_dashboard",
+        "view_data",
+        "crud_master",
+        "crud_qc",
+        "crud_km",
+        "delete"
+    ],
+    "user": [
+        "view_dashboard",
+        "view_data"
+    ]
+}
 
+# =====================
+# LOGIN
+# =====================
 def login(username, password):
 
-    if username in USERS and USERS[username]["password"] == password:
-        return True, USERS[username]["role"]
+    user = USERS.get(username)
+
+    if user and user["password"] == password:
+        return True, user["role"]
 
     return False, None
+
+
+# =====================
+# CHECK PERMISSION
+# =====================
+def has_permission(permission):
+
+    role = st.session_state.get("role")
+
+    if not role:
+        return False
+
+    return permission in ROLE_PERMISSIONS.get(role, [])

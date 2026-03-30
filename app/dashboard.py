@@ -29,6 +29,7 @@ from modules.crud_operational import (
     create_km, update_km, delete_km
 )
 from modules.auth import login
+from modules.auth import login, has_permission
 
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
@@ -135,6 +136,21 @@ if st.sidebar.button("Logout"):
 #    ],
 #    key="menu"
 #)
+menu_options = ["Dashboard"]
+
+if has_permission("view_data"):
+    menu_options.append("Fleet Data")
+
+if has_permission("crud_master"):
+    menu_options.append("CRUD Master")
+
+if has_permission("crud_qc"):
+    menu_options.append("CRUD QC")
+
+if has_permission("crud_km"):
+    menu_options.append("CRUD KM")
+
+menu = st.sidebar.selectbox("Menu", menu_options)
 
 menu_options = [
     "Dashboard",
@@ -374,11 +390,13 @@ if menu == "Vehicle Detail":
 if menu == "CRUD Master":
 
     # 🔐 CEK ROLE
-    if st.session_state.role != "admin":
-        st.warning("Akses ditolak! Hanya admin.")
+    if menu == "CRUD Master":
+
+    if not has_permission("crud_master"):
+        st.error("Akses ditolak")
         st.stop()
 
-    st.title("CRUD Master Kendaraan")
+    st.title("CRUD Master")
 
     # LOAD DATA
     master, _, _, _ = load_data()
@@ -564,12 +582,12 @@ if menu == "CRUD KM":
         no_polisi = st.text_input("No Polisi")
 
 
-if st.session_state.role == "admin":
+if has_permission("delete"):
     if st.button("Delete"):
         delete_master(row_index)
         st.cache_data.clear()
         st.rerun()
 else:
-    st.info("Hanya admin yang bisa hapus data")
+    st.info("Tidak punya akses hapus")
 
  
