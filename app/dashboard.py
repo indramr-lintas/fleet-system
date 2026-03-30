@@ -83,7 +83,6 @@ if "login_status" not in st.session_state:
 if "role" not in st.session_state:
     st.session_state.role = None
 
-
 if not st.session_state.login_status:
 
     st.title("🔐 Login Fleet System")
@@ -122,20 +121,20 @@ if st.sidebar.button("Logout"):
 # Menu
 # ====================    
 
-menu = st.sidebar.selectbox(
-    "Menu",
-    [
-        "Dashboard",
-        "Fleet Data",
-        "Maintenance",
-        "QC Inspection",
-        "Vehicle Detail",
-        "CRUD Master",
-        "CRUD QC",
-        "CRUD KM"
-    ],
-    key="menu"
-)
+#menu = st.sidebar.selectbox(
+#    "Menu",
+#    [
+#        "Dashboard",
+#        "Fleet Data",
+#        "Maintenance",
+#        "QC Inspection",
+#        "Vehicle Detail",
+#        "CRUD Master",
+#        "CRUD QC",
+#        "CRUD KM"
+#    ],
+#    key="menu"
+#)
 
 menu_options = [
     "Dashboard",
@@ -563,7 +562,7 @@ if menu == "CRUD KM":
 
     with col2:
         no_polisi = st.text_input("No Polisi")
-        
+
 
 if st.session_state.role == "admin":
     if st.button("Delete"):
