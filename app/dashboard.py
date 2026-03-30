@@ -28,6 +28,7 @@ from modules.crud_operational import (
     create_qc, update_qc, delete_qc,
     create_km, update_km, delete_km
 )
+from modules.auth import login
 
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
@@ -72,6 +73,51 @@ def get_status(row):
 
 status_df["STATUS"] = status_df.apply(get_status, axis=1)
 
+# =====================
+# LOGIN SYSTEM
+# =====================
+
+if "login_status" not in st.session_state:
+    st.session_state.login_status = False
+
+if "role" not in st.session_state:
+    st.session_state.role = None
+
+
+if not st.session_state.login_status:
+
+    st.title("🔐 Login Fleet System")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+
+        status, role = login(username, password)
+
+        if status:
+            st.session_state.login_status = True
+            st.session_state.role = role
+            st.success("Login berhasil")
+            st.rerun()
+        else:
+            st.error("Username / Password salah")
+
+    st.stop()  # ⛔ STOP APP kalau belum login
+
+# =====================
+# SIDEBAR
+# =====================
+
+st.sidebar.title("Menu")
+
+# 🔐 LOGOUT
+if st.sidebar.button("Logout"):
+    st.session_state.login_status = False
+    st.session_state.role = None
+    st.rerun()
+
+
 # ====================
 # Menu
 # ====================    
@@ -90,6 +136,22 @@ menu = st.sidebar.selectbox(
     ],
     key="menu"
 )
+
+menu_options = [
+    "Dashboard",
+    "Fleet Data",
+    "Maintenance"
+]
+
+# hanya admin yang bisa akses CRUD
+if st.session_state.role == "admin":
+    menu_options += ["CRUD Master", "CRUD QC", "CRUD KM"]
+
+menu = st.sidebar.selectbox("Menu", menu_options)
+
+
+with st.spinner("Loading data..."):
+    master, dokumen, km, qc = load_data()
 
 # =====================
 # SEARCH UNIT
@@ -123,7 +185,9 @@ if menu == "Dashboard":
     service_due = service_alert(km)
     doc_due = document_alert(dokumen)
 
+    # =====================
     # KPI
+    # =====================
     col1, col2, col3 = st.columns(3)
 
     col1.metric("Total Armada", len(master))
@@ -216,7 +280,7 @@ if menu == "Fleet Data":
         ]].style.apply(highlight_status, axis=1),
         use_container_width=True
     )
-    
+
     st.title("Data Kendaraan")
 
     st.dataframe(
@@ -309,6 +373,11 @@ if menu == "Vehicle Detail":
 # ====================
 
 if menu == "CRUD Master":
+
+    # 🔐 CEK ROLE
+    if st.session_state.role != "admin":
+        st.warning("Akses ditolak! Hanya admin.")
+        st.stop()
 
     st.title("CRUD Master Kendaraan")
 
@@ -494,6 +563,14 @@ if menu == "CRUD KM":
 
     with col2:
         no_polisi = st.text_input("No Polisi")
+        
 
+if st.session_state.role == "admin":
+    if st.button("Delete"):
+        delete_master(row_index)
+        st.cache_data.clear()
+        st.rerun()
+else:
+    st.info("Hanya admin yang bisa hapus data")
 
  
