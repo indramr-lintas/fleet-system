@@ -438,11 +438,11 @@ if menu == "CRUD Master":
         no_polisi = st.text_input("No Polisi")
 
     if has_permission("delete"):
-    if st.button("Delete Data Ini"):
-        delete_master(selected_index)
-        st.warning("Data dihapus")
-        st.cache_data.clear()
-        st.rerun()
+        if st.button("Delete Data Ini"):
+            delete_master(selected_index)
+            st.warning("Data dihapus")
+            st.cache_data.clear()
+            st.rerun()
 
 # ====================
 # CURD QC
