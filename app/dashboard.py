@@ -28,7 +28,6 @@ from modules.crud_operational import (
     create_qc, update_qc, delete_qc,
     create_km, update_km, delete_km
 )
-from modules.auth import login
 from modules.auth import login, has_permission
 
 with st.spinner("Loading data..."):
@@ -152,21 +151,7 @@ if has_permission("crud_km"):
 
 menu = st.sidebar.selectbox("Menu", menu_options)
 
-menu_options = [
-    "Dashboard",
-    "Fleet Data",
-    "Maintenance"
-]
 
-# hanya admin yang bisa akses CRUD
-if st.session_state.role == "admin":
-    menu_options += ["CRUD Master", "CRUD QC", "CRUD KM"]
-
-menu = st.sidebar.selectbox("Menu", menu_options)
-
-
-with st.spinner("Loading data..."):
-    master, dokumen, km, qc = load_data()
 
 # =====================
 # SEARCH UNIT
@@ -397,9 +382,6 @@ if menu == "CRUD Master":
 
     st.title("CRUD Master")
 
-    # LOAD DATA
-    master, _, _, _ = load_data()
-
     # =====================
     # CREATE
     # =====================
@@ -441,11 +423,7 @@ if menu == "CRUD Master":
     # =====================
     st.subheader("✏️ Edit / Hapus")
 
-    selected_index = st.selectbox(
-        "Pilih Data",
-        master.index
-    )
-
+    selected_index = st.selectbox("Pilih Data", master.index)
     row = master.loc[selected_index]
 
     new_id = st.text_input("ID Unit (Edit)", row["ID_UNIT"])
@@ -459,22 +437,29 @@ if menu == "CRUD Master":
     with col2:
         no_polisi = st.text_input("No Polisi")
 
+    if has_permission("delete"):
+    if st.button("Delete Data Ini"):
+        delete_master(selected_index)
+        st.warning("Data dihapus")
+        st.cache_data.clear()
+        st.rerun()
+
 # ====================
 # CURD QC
 # ====================
 
 if menu == "CRUD QC":
 
-    st.title("QC Inspection")
+    if not has_permission("crud_qc"):
+        st.error("Akses ditolak")
+        st.stop()
 
-    _, _, _, qc = load_data()
+    st.title("QC Inspection")
 
     # CREATE
     st.subheader("➕ Input QC")
 
     with st.form("form_qc"):
-
-        master, _, _, _ = load_data()
 
         id_unit = st.selectbox(
             "Pilih ID Unit",
@@ -526,9 +511,11 @@ if menu == "CRUD QC":
 
 if menu == "CRUD KM":
 
-    st.title("Monitoring KM")
+    if not has_permission("crud_km"):
+        st.error("Akses ditolak")
+        st.stop()
 
-    _, _, km, _ = load_data()
+    st.title("Monitoring KM")
 
     # CREATE
     st.subheader("➕ Input KM")
@@ -581,12 +568,5 @@ if menu == "CRUD KM":
         no_polisi = st.text_input("No Polisi")
 
 
-if has_permission("delete"):
-    if st.button("Delete"):
-        delete_master(row_index)
-        st.cache_data.clear()
-        st.rerun()
-else:
-    st.info("Tidak punya akses hapus")
 
  
