@@ -8,11 +8,11 @@ st.set_page_config(
     layout="wide"
 )
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, ROOT_DIR)
 
 from modules.loader import load_data
 from modules.alerts import service_alert, document_alert
-from modules.analytics import km_chart
 from modules.styling import highlight_service
 from modules.analytics import km_chart, utilization_chart, qc_chart
 from modules.fleet_status import fleet_status
@@ -28,7 +28,10 @@ from modules.crud_operational import (
     create_qc, update_qc, delete_qc,
     create_km, update_km, delete_km
 )
-from modules.auth import login, has_permission
+from modules import auth
+
+login = auth.login
+has_permission = auth.has_permission
 
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
