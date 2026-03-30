@@ -390,7 +390,6 @@ if menu == "Vehicle Detail":
 if menu == "CRUD Master":
 
     # 🔐 CEK ROLE
-    if menu == "CRUD Master":
 
     if not has_permission("crud_master"):
         st.error("Akses ditolak")
