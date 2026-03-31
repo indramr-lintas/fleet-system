@@ -21,14 +21,17 @@ ROLE_PERMISSIONS = {
     "admin": [
         "view_dashboard",
         "view_data",
+        "qc_inspection",
+        "view_detail"
         "crud_master",
         "crud_qc",
         "crud_km",
         "delete"
     ],
     "user": [
-        "view_dashboard",
-        "view_data"
+        "view_data",
+        "qc_inspection",
+        "view_detail"
     ]
 }
 

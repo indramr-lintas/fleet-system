@@ -143,6 +143,12 @@ menu_options = ["Dashboard"]
 if has_permission("view_data"):
     menu_options.append("Fleet Data")
 
+if has_permission("qc_inspection"):
+    menu_options.append("QC Inspection")
+
+if has_permission("view_detail"):
+    menu_options.append("Vehicle Detail")
+
 if has_permission("crud_master"):
     menu_options.append("CRUD Master")
 
