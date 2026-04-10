@@ -258,7 +258,7 @@ if menu == "Dashboard":
             st.dataframe(service_due, use_container_width=True)
 
     with col2:
-        st.subheader("📄 Dokumen Expiredted")
+        st.subheader("📄 Dokumen Expired")
 
         doc_due = document_alert(dokumen)
 
@@ -312,7 +312,7 @@ if menu == "Maintenance":
 
     prediction = maintenance_prediction(km)
 
-    st.subheader("🔧 Service Prediction (<5000 KM)")
+    st.subheader("🔧 Service Prediction (<1000 KM)")
 
     st.dataframe(
         prediction,
