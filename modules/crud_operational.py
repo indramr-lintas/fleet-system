@@ -53,3 +53,4 @@ def update_km(row, data):
 def delete_km(row):
     ws = connect_sheet().worksheet("MONITORING_KM")
     ws.delete_rows(row)
+    

@@ -258,7 +258,7 @@ if menu == "Dashboard":
             st.dataframe(service_due, use_container_width=True)
 
     with col2:
-        st.subheader("📄 Dokumen Expired")
+        st.subheader("📄 Dokumen Expiredted")
 
         doc_due = document_alert(dokumen)
 
