@@ -6,7 +6,7 @@ def maintenance_prediction(km):
     km["KM_SERVICE_NEXT"] = pd.to_numeric(km["KM_SERVICE_NEXT"], errors="coerce")
 
     prediction = km[
-        (km["KM_SERVICE_NEXT"] - km["KM_UPDATE"] <= 5000) &
+        (km["KM_SERVICE_NEXT"] - km["KM_UPDATE"] <= 1000) &
         (km["KM_SERVICE_NEXT"] - km["KM_UPDATE"] > 0)
     ]
 

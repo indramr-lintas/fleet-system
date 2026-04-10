@@ -35,7 +35,7 @@ def qc_control_board(qc):
 
         else:
             icon = "🟡"
-            color = "#f1f508"
+            color = "#f7c708"
             text = issue
 
         card = f"""

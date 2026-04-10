@@ -27,7 +27,7 @@ def fleet_status(master, km, dokumen):
         elif row["KM_UPDATE"] > row["KM_SERVICE_NEXT"]:
             status.append("Service Overdue")
 
-        elif row["KM_SERVICE_NEXT"] - row["KM_UPDATE"] < 2000:
+        elif row["KM_SERVICE_NEXT"] - row["KM_UPDATE"] < 1000:
             status.append("Service Soon")
 
         else:
