@@ -36,45 +36,8 @@ has_permission = auth.has_permission
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
 
-# =====================
-# MERGE DATA
-# =====================
-
-status_df = master.merge(km, on="ID_UNIT", how="left")
-
-# =====================
-# FILTER UNIT
-# =====================
-
-# unit_filter = st.selectbox(
-#    "Pilih Unit",
-#    ["All"] + list(master["ID_UNIT"].unique()),
-#    key="filter_unit"
-# )
-
-# filter jika dipilih
-#if unit_filter != "All":
-
-#    master = master[master["ID_UNIT"] == unit_filter]
-#    km = km[km["ID_UNIT"] == unit_filter]
-#    qc = qc[qc["ID_UNIT"] == unit_filter]
-
-# =====================
-# STATUS ARMADA
-# =====================
-
-def get_status(row):
-
-    if row["KM_UPDATE"] > row["KM_SERVICE_NEXT"]:
-        return "Service Overdue"
-
-    elif row["KM_SERVICE_NEXT"] - row["KM_UPDATE"] <= 5000:
-        return "Service Soon"
-
-    else:
-        return "Ready"
-
-status_df["STATUS"] = status_df.apply(get_status, axis=1)
+km = maintenance_prediction(km)
+status_df = fleet_status(master, km, dokumen)
 
 # =====================
 # LOGIN SYSTEM
@@ -310,7 +273,8 @@ if menu == "Maintenance":
         use_container_width=True
     )
 
-    prediction = maintenance_prediction(km)
+    prediction = km[km["SISA_KM_SERVICE"] <= 1000]
+    prediction = km[km["SISA_KM_SERVICE"] <= 1000].sort_values("SISA_KM_SERVICE")
 
     st.subheader("🔧 Service Prediction (<1000 KM)")
 

@@ -11,8 +11,7 @@ def fleet_control_board(df):
     for i, row in df.iterrows():
 
         status = row["STATUS"]
-
-        nopol = row.get("NO POLISI", "-")
+        nopol = row.get("NO_POLISI", "-")   # ✅ INI WAJIB
         km = row.get("KM_UPDATE", "-")
 
         if status == "Ready":
@@ -23,9 +22,13 @@ def fleet_control_board(df):
             color = "#ffc107"
             icon = "🟡"
 
-        else:
+        elif status == "Service Overdue":
             color = "#dc3545"
             icon = "🔴"
+
+        elif status == "Dokumen Expired":
+            color = "#6c757d"
+            icon = "⚫"
 
         card = f"""
         <div style="
