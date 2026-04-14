@@ -36,7 +36,6 @@ has_permission = auth.has_permission
 with st.spinner("Loading data..."):
     master, dokumen, km, qc = load_data()
 
-km = maintenance_prediction(km)
 status_df = fleet_status(master, km, dokumen)
 
 # =====================
@@ -500,7 +499,8 @@ if menu == "CRUD KM":
             master["ID_UNIT"].unique()
         )
         km_update = st.number_input("KM Update")
-        km_next = st.number_input("KM Service Next")
+        interval = 1000
+        km_next = km_update + interval
 
         submit = st.form_submit_button("Simpan")
 
